@@ -5,21 +5,15 @@
 <hr/>
 
 # DAY 1: Login UI with google signin implementation
-
-https://github.com/PaudelSworup/UI_Challenge/assets/96978659/5ba1c07a-fc91-486c-b078-ce63dfdb810a
-
+https://github.com/PaudelSworup/UI_Challenge/assets/96978659/0a6fb0b4-6e79-45f1-a2d7-1364f8baa1d9
 <hr/>
 
 # DAY 2: Grocery Bill App UI
-
-https://github.com/PaudelSworup/UI_Challenge/assets/96978659/f37eb5b7-7e08-41a9-9611-dcc7bb587eb4
-
+https://github.com/PaudelSworup/UI_Challenge/assets/96978659/c094cc6d-59f5-4fb7-ac69-0425de62d5f6
 <hr/>
 
 # DAY 3: Movie App UI
-
  https://github.com/PaudelSworup/UI_Challenge/assets/96978659/b74f5521-c717-4459-a837-7e12d190dab2
-
 <hr/>
 
 
