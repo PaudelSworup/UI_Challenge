@@ -13,8 +13,23 @@ https://github.com/PaudelSworup/UI_Challenge/assets/96978659/c094cc6d-59f5-4fb7-
 <hr/>
 
 # DAY 3: Movie App UI
- https://github.com/PaudelSworup/UI_Challenge/assets/96978659/b74f5521-c717-4459-a837-7e12d190dab2
+https://github.com/PaudelSworup/UI_Challenge/assets/96978659/8b4e5df1-61ec-4db4-bb49-fa8583525a72
 <hr/>
+
+# DAY 4: Movie App UI(Loading animation UI until data gets Loaded from backend server)
+https://github.com/PaudelSworup/UI_Challenge/assets/96978659/76e76ff8-379d-44ef-af97-3532aad7f593
+<hr/>
+
+
+
+
+
+
+
+
+
+
+
 
 
 
