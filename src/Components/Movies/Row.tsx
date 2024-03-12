@@ -1,11 +1,4 @@
-import {
-  View,
-  Text,
-  ScrollView,
-  Image,
-  FlatList,
-  TouchableOpacity,
-} from 'react-native';
+import {View, Text, Image, FlatList, TouchableOpacity} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {moviesProps} from '../../Interfaces/Interface';
 import {IMAGE_URL} from '../../../config';
@@ -24,7 +17,7 @@ const Row: React.FC<{title: string; movies?: any}> = ({title, movies}) => {
   useEffect(() => {
     // Check if movies data is loaded
     if (movies && movies.length > 0) {
-      setLoading(false); // Set loading state to false when data is loaded
+      setLoading(false);
     }
   }, [movies]);
 
@@ -33,7 +26,7 @@ const Row: React.FC<{title: string; movies?: any}> = ({title, movies}) => {
       className="relative"
       style={{
         borderRadius: 20,
-        marginRight: 10, // Add some margin between items
+        marginRight: 10,
       }}>
       <TouchableOpacity
         onPress={() =>
@@ -77,7 +70,7 @@ const Row: React.FC<{title: string; movies?: any}> = ({title, movies}) => {
           See All
         </Text>
       </View>
-      {loading ? ( // Render skeleton if loading
+      {loading ? ( // Render skeleton if loading state
         <Skeleton />
       ) : (
         // Render movie items if data is loaded
@@ -89,13 +82,6 @@ const Row: React.FC<{title: string; movies?: any}> = ({title, movies}) => {
           contentContainerStyle={{marginTop: 5, marginLeft: 2}} // Adjust spacing as needed
         />
       )}
-      {/* <FlatList
-        horizontal
-        data={movies}
-        keyExtractor={item => item.id.toString()}
-        renderItem={({item}) => <MovieItem item={item} />}
-        contentContainerStyle={{marginTop: 5, marginLeft: 2}} // Adjust spacing as needed
-      /> */}
     </View>
   );
 };

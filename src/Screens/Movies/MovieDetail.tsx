@@ -5,21 +5,30 @@ import {
   Image,
   StatusBar,
   TouchableOpacity,
+  Alert,
+  BackHandler,
 } from 'react-native';
-import React, {useState} from 'react';
-import {RouteProp, useRoute} from '@react-navigation/native';
+import React, {useCallback, useState} from 'react';
+import {
+  ParamListBase,
+  RouteProp,
+  useFocusEffect,
+  useNavigation,
+  useRoute,
+} from '@react-navigation/native';
 import {useQuery} from 'react-query';
 import {single_movies} from '../../APIS/API/MoviesApi';
 import {IMAGE_URL} from '../../../config';
-import {HeartIcon} from 'react-native-heroicons/outline';
-import {Button} from 'react-native-paper';
 import {
-  ArchiveBoxIcon,
+  ArrowsPointingOutIcon,
   PlayIcon,
   XMarkIcon,
-} from 'react-native-heroicons/outline';
+} from 'react-native-heroicons/solid';
 import Video from 'react-native-video';
 import Orientation from 'react-native-orientation-locker';
+import {ActivityIndicator} from 'react-native-paper';
+import {overFlow} from '../../utils/utils';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 
 type RootStackParamList = {
   movieDetailID: {movieId?: number};
@@ -27,9 +36,11 @@ type RootStackParamList = {
 const MovieDetail = () => {
   const [fullScreen, setFullScreen] = useState<boolean>(false);
   const [movies, setMovies] = useState<any>();
+  const [loading, setLoading] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
   const route = useRoute<RouteProp<RootStackParamList, 'movieDetailID'>>();
   const {movieId} = route.params;
+  const navigation = useNavigation<NativeStackNavigationProp<ParamListBase>>();
 
   const singleMovies = useQuery(
     ['movieDetails', movieId],
@@ -59,38 +70,99 @@ const MovieDetail = () => {
     setShowVideo(false);
   };
 
+  const onLoadStart = () => {
+    setLoading(true);
+  };
+
+  const onLoad = () => {
+    setLoading(false);
+  };
+
+  const onError = () => {
+    setLoading(false);
+    // Handle error if video fails to load
+  };
+
+  const handleBackPress = useCallback(() => {
+    // Show alert dialog when back button is pressed
+    Alert.alert(
+      'Go back',
+      'Are you sure you want to Exit?',
+      [
+        {text: 'Cancel', style: 'cancel'},
+        {
+          text: 'OK',
+          onPress: () => {
+            Orientation.lockToPortrait();
+            navigation.goBack();
+          },
+        },
+      ],
+      {cancelable: false},
+    );
+    // Return true to prevent the default back button action
+    return true;
+  }, [navigation]);
+
+  useFocusEffect(
+    useCallback(() => {
+      BackHandler.addEventListener('hardwareBackPress', handleBackPress);
+      return () => {
+        BackHandler.removeEventListener('hardwareBackPress', handleBackPress);
+      };
+    }, [handleBackPress]),
+  );
+
   return (
     <ScrollView className="bg-black">
-      <View className="h-80 ">
-        <StatusBar hidden />
-        {showVideo ? ( // Render video player if showVideo state is true
-          <View
-            style={{
-              height: fullScreen ? '100%' : 300,
-              width: '100%',
-              padding: 10,
-            }}>
-            <Video
-              style={{height: fullScreen ? '100%' : 300}}
-              source={{
-                uri: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-              }}
-              resizeMode="contain"
-              controls
+      <StatusBar hidden />
+      {showVideo ? (
+        <View className={`${fullScreen && 'h-full'} h-[500px] relative`}>
+          <Video
+            style={{height: fullScreen ? '100%' : 400, width: '100%'}}
+            source={{
+              uri: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+            }}
+            resizeMode="cover"
+            onLoadStart={onLoadStart}
+            onLoad={onLoad}
+            onError={onError}
+            controls
+          />
+
+          {loading && (
+            <ActivityIndicator
+              className="absolute top-[40%] left-[50%]"
+              size="large"
+              animating={true}
+              color="red"
             />
-            <TouchableOpacity
-              onPress={() => setShowVideo(false)}
-              style={{position: 'absolute', top: 20, right: 20}}>
-              <XMarkIcon size={25} color="white" onPress={handleVideo} />
-              <ArchiveBoxIcon
-                size={25}
-                color="white"
-                onPress={handleOrientationChange}
-              />
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <>
+          )}
+
+          {!loading && (
+            <>
+              <TouchableOpacity
+                onPress={() => setShowVideo(false)}
+                className="absolute right-0 p-2">
+                <XMarkIcon size={25} color="red" onPress={handleVideo} />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => setShowVideo(false)}
+                className="absolute bottom-24 p-2 right-0">
+                <ArrowsPointingOutIcon
+                  className="bg-red-200"
+                  size={25}
+                  color="white"
+                  onPress={handleOrientationChange}
+                />
+              </TouchableOpacity>
+            </>
+          )}
+        </View>
+      ) : (
+        <View>
+          <View className="h-80 relative ">
             <Image
               source={{uri: `${IMAGE_URL}/${movies?.backdrop_path}`}}
               className="h-80"
@@ -102,7 +174,7 @@ const MovieDetail = () => {
                 setShowVideo(true);
               }} // Set showVideo state to true when button is clicked
               style={{backgroundColor: 'rgba(255,255,255,0.3)'}}
-              className="rounded-l-full bottom-40 p-2 absolute  right-0">
+              className="rounded-l-full absolute bottom-32 p-2 right-0">
               <View className="flex-row items-center space-x-1">
                 <View className="bg-white rounded-full p-1">
                   <PlayIcon size={22} color="red" />
@@ -112,7 +184,7 @@ const MovieDetail = () => {
             </TouchableOpacity>
 
             <View
-              className="bottom-24 p-4 w-full h-full "
+              className=" absolute bottom-0 w-full p-4 "
               style={{backgroundColor: 'rgba(255,255,255,0.2)'}}>
               <Text className="font-bold text-center text-white text-lg tracking-widest">
                 {movies?.title}
@@ -121,9 +193,17 @@ const MovieDetail = () => {
                 {`${movies?.original_language} | ${names} | ${movies?.runtime} m`}
               </Text>
             </View>
-          </>
-        )}
-      </View>
+          </View>
+          <View className="mt-1 p-2">
+            <Text className="text-white font-bold text-lg tracking-widest">
+              Story Line
+            </Text>
+            <Text className="text-white tracking-wide text-base text-justify leading-[22px]">
+              {overFlow(movies?.overview, 150)}
+            </Text>
+          </View>
+        </View>
+      )}
     </ScrollView>
   );
 };
