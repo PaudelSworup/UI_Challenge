@@ -130,6 +130,8 @@ const MovieDetail = () => {
             controls
           />
 
+          {/* show when loading state */}
+
           {loading && (
             <ActivityIndicator
               className="absolute top-[40%] left-[50%]"
