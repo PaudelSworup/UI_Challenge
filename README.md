@@ -15,3 +15,12 @@ https://github.com/PaudelSworup/uiChallange/assets/96978659/5ba1c07a-fc91-486c-b
 https://github.com/PaudelSworup/uiChallange/assets/96978659/f37eb5b7-7e08-41a9-9611-dcc7bb587eb4
 
 <hr/>
+
+# DAY 3: Movie App UI
+
+ https://github.com/PaudelSworup/uiChallange/assets/96978659/b74f5521-c717-4459-a837-7e12d190dab2
+
+<hr/>
+
+
+
