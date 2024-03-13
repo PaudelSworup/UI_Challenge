@@ -41,3 +41,9 @@ export const single_movies = async (id: number) => {
   const movies = await response.json();
   return movies;
 };
+
+export const movies_videos = async (movieID: number) => {
+  const response = await fetch(`${BASE_URL}/videos/${movieID}`);
+  const movies = await response.json();
+  return movies;
+};

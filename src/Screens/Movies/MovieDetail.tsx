@@ -17,7 +17,7 @@ import {
   useRoute,
 } from '@react-navigation/native';
 import {useQuery} from 'react-query';
-import {single_movies} from '../../APIS/API/MoviesApi';
+import {movies_videos, single_movies} from '../../APIS/API/MoviesApi';
 import {IMAGE_URL} from '../../../config';
 import {
   ArrowsPointingOutIcon,
@@ -29,6 +29,7 @@ import Orientation from 'react-native-orientation-locker';
 import {ActivityIndicator} from 'react-native-paper';
 import {overFlow} from '../../utils/utils';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import YoutubePlayer from 'react-native-youtube-iframe';
 
 type RootStackParamList = {
   movieDetailID: {movieId?: number};
@@ -38,8 +39,12 @@ const MovieDetail = () => {
   const [movies, setMovies] = useState<any>();
   const [loading, setLoading] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
+  const [playing, setPlaying] = useState(false);
+  const [videos, setVideos] = useState<any>();
+
   const route = useRoute<RouteProp<RootStackParamList, 'movieDetailID'>>();
   const {movieId} = route.params;
+
   const navigation = useNavigation<NativeStackNavigationProp<ParamListBase>>();
 
   const singleMovies = useQuery(
@@ -56,6 +61,14 @@ const MovieDetail = () => {
 
   const names = genres?.slice(0, 3).join(', ');
 
+  const moviesVideos = useQuery(
+    ['movieVideo', movieId],
+    async () => movies_videos(movieId as number),
+    {
+      onSettled: data => setVideos(data?.movies),
+    },
+  );
+
   const handleOrientationChange = () => {
     if (fullScreen) {
       Orientation.lockToPortrait();
@@ -63,24 +76,6 @@ const MovieDetail = () => {
       Orientation.lockToLandscape();
     }
     setFullScreen(!fullScreen);
-  };
-
-  const handleVideo = () => {
-    Orientation.lockToPortrait();
-    setShowVideo(false);
-  };
-
-  const onLoadStart = () => {
-    setLoading(true);
-  };
-
-  const onLoad = () => {
-    setLoading(false);
-  };
-
-  const onError = () => {
-    setLoading(false);
-    // Handle error if video fails to load
   };
 
   const handleBackPress = useCallback(() => {
@@ -113,12 +108,19 @@ const MovieDetail = () => {
     }, [handleBackPress]),
   );
 
+  const onStateChange = useCallback((state: any) => {
+    if (state === 'ended') {
+      setPlaying(false);
+      Alert.alert('video has finished playing!');
+    }
+  }, []);
+
   return (
     <ScrollView className="bg-black">
       <StatusBar hidden />
       {showVideo ? (
         <View className={`${fullScreen && 'h-full'} h-[500px] relative`}>
-          <Video
+          {/* <Video
             style={{height: fullScreen ? '100%' : 400, width: '100%'}}
             source={{
               uri: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
@@ -128,39 +130,43 @@ const MovieDetail = () => {
             onLoad={onLoad}
             onError={onError}
             controls
-          />
+          /> */}
 
-          {/* show when loading state */}
-
-          {loading && (
+          {loading ? (
             <ActivityIndicator
               className="absolute top-[40%] left-[50%]"
               size="large"
               animating={true}
               color="red"
             />
+          ) : (
+            <YoutubePlayer
+              height={500}
+              play={playing}
+              videoId={videos?.trailer?.youtube_video_id}
+              onFullScreenChange={handleOrientationChange}
+              onChangeState={onStateChange}
+            />
           )}
 
-          {!loading && (
-            <>
-              <TouchableOpacity
-                onPress={() => setShowVideo(false)}
-                className="absolute right-0 p-2">
-                <XMarkIcon size={25} color="red" onPress={handleVideo} />
-              </TouchableOpacity>
+          {/* <>
+            <TouchableOpacity
+              onPress={() => setShowVideo(false)}
+              className="absolute right-0 p-2">
+              <XMarkIcon size={25} color="red" onPress={handleVideo} />
+            </TouchableOpacity>
 
-              <TouchableOpacity
-                onPress={() => setShowVideo(false)}
-                className="absolute bottom-24 p-2 right-0">
-                <ArrowsPointingOutIcon
-                  className="bg-red-200"
-                  size={25}
-                  color="white"
-                  onPress={handleOrientationChange}
-                />
-              </TouchableOpacity>
-            </>
-          )}
+            <TouchableOpacity
+              onPress={() => setShowVideo(false)}
+              className="absolute bottom-24 p-2 right-0">
+              <ArrowsPointingOutIcon
+                className="bg-red-200"
+                size={25}
+                color="white"
+                onPress={handleOrientationChange}
+              />
+            </TouchableOpacity>
+          </> */}
         </View>
       ) : (
         <View>
