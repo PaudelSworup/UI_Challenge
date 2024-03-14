@@ -20,6 +20,14 @@ https://github.com/PaudelSworup/UI_Challenge/assets/96978659/8b4e5df1-61ec-4db4-
 https://github.com/PaudelSworup/UI_Challenge/assets/96978659/76e76ff8-379d-44ef-af97-3532aad7f593
 <hr/>
 
+# DAY 4,5: Movie App UI(Banner Implementation with video and added star cast and yotube videos to movie details)
+https://github.com/PaudelSworup/UI_Challenge/assets/96978659/4b605b1e-2e9f-495f-a384-8221ccc0d204
+<hr/>
+
+
+
+
+
 
 
 
