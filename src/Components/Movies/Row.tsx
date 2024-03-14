@@ -2,7 +2,7 @@ import {View, Text, Image, FlatList, TouchableOpacity} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {moviesProps} from '../../Interfaces/Interface';
 import {IMAGE_URL} from '../../../config';
-import {StarIcon} from 'react-native-heroicons/outline';
+import {StarIcon} from 'react-native-heroicons/solid';
 import {ParamListBase, useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import navigationStrings from '../../Contstants/navigationStrings';

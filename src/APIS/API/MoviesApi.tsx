@@ -47,3 +47,9 @@ export const movies_videos = async (movieID: number) => {
   const movies = await response.json();
   return movies;
 };
+
+export const movies_cast = async (movieID: number) => {
+  const response = await fetch(`${BASE_URL}/credits/${movieID}`);
+  const movies = await response.json();
+  return movies;
+};

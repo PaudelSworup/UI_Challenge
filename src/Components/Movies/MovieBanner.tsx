@@ -41,7 +41,7 @@ const MovieBanner = () => {
       {play ? (
         <YoutubePlayer
           height={200}
-          forceAndroidAutoplay
+          play={true}
           videoId={videos?.trailer?.youtube_video_id}
         />
       ) : (
@@ -58,13 +58,6 @@ const MovieBanner = () => {
           style={{flex: 1}}
         />
       )}
-      {/* 
-      {videos?.trailer?.youtube_video_id && !play && (
-        <YoutubePlayer
-          height={500}
-          videoId={videos?.trailer?.youtube_video_id}
-        />
-      )} */}
 
       {!play && (
         <View className="bottom-4 p-3 absolute">

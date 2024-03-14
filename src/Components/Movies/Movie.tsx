@@ -59,7 +59,7 @@ const Movie = () => {
   });
 
   return (
-    <SafeAreaView className="h-full px-2 pb-2 bg-[#0F111D]">
+    <SafeAreaView className="h-full px-2 pb-2 bg-[#272728]">
       <View className="justify-between py-3  flex-row">
         <View>
           <Text className="text-[20px] tracking-wider text-white font-bold">
