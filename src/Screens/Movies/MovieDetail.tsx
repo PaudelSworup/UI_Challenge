@@ -8,6 +8,7 @@ import {
   Alert,
   BackHandler,
   FlatList,
+  SafeAreaView,
 } from 'react-native';
 import React, {useCallback, useState} from 'react';
 import {
@@ -31,7 +32,7 @@ import {
 } from 'react-native-heroicons/solid';
 import Video from 'react-native-video';
 import Orientation from 'react-native-orientation-locker';
-import {ActivityIndicator} from 'react-native-paper';
+import {ActivityIndicator, Snackbar} from 'react-native-paper';
 import {overFlow} from '../../utils/utils';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import YoutubePlayer from 'react-native-youtube-iframe';
@@ -47,6 +48,8 @@ const MovieDetail = () => {
   const [playing, setPlaying] = useState(false);
   const [videos, setVideos] = useState<any>();
   const [cast, setCast] = useState<any>();
+  const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const [backPressedOnce, setBackPressedOnce] = useState(false);
 
   const route = useRoute<RouteProp<RootStackParamList, 'movieDetailID'>>();
   const {movieId} = route.params;
@@ -97,25 +100,21 @@ const MovieDetail = () => {
   };
 
   const handleBackPress = useCallback(() => {
-    // Show alert dialog when back button is pressed
-    Alert.alert(
-      'Go back',
-      'Are you sure you want to Exit?',
-      [
-        {text: 'Cancel', style: 'cancel'},
-        {
-          text: 'OK',
-          onPress: () => {
-            Orientation.lockToPortrait();
-            navigation.goBack();
-          },
-        },
-      ],
-      {cancelable: false},
-    );
+    if (backPressedOnce) {
+      // If back button is pressed twice within a certain time frame, navigate back
+      navigation.goBack();
+      return true;
+    }
+
+    // Show Snackbar when back button is pressed
+    setSnackbarVisible(true);
+
+    setBackPressedOnce(true);
+    setTimeout(() => setBackPressedOnce(false), 2000);
+
     // Return true to prevent the default back button action
     return true;
-  }, [navigation]);
+  }, [navigation, backPressedOnce]);
 
   useFocusEffect(
     useCallback(() => {
@@ -154,113 +153,123 @@ const MovieDetail = () => {
 
   return (
     <ScrollView className="bg-[#272728]">
-      <StatusBar hidden />
-      {showVideo ? (
-        <View className={`${fullScreen && 'h-full'} h-[500px] relative`}>
-          {/* <Video
-            style={{height: fullScreen ? '100%' : 400, width: '100%'}}
-            source={{
-              uri: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-            }}
-            resizeMode="cover"
-            onLoadStart={onLoadStart}
-            onLoad={onLoad}
-            onError={onError}
-            controls
-          /> */}
-
-          {loading ? (
-            <ActivityIndicator
-              className="absolute top-[40%] left-[50%]"
-              size="large"
-              animating={true}
-              color="red"
-            />
-          ) : (
-            <YoutubePlayer
-              height={500}
-              play={playing}
-              videoId={videos?.trailer?.youtube_video_id}
-              onFullScreenChange={handleOrientationChange}
-              onChangeState={onStateChange}
-            />
-          )}
-
-          {/* <>
-            <TouchableOpacity
-              onPress={() => setShowVideo(false)}
-              className="absolute right-0 p-2">
-              <XMarkIcon size={25} color="red" onPress={handleVideo} />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => setShowVideo(false)}
-              className="absolute bottom-24 p-2 right-0">
-              <ArrowsPointingOutIcon
-                className="bg-red-200"
-                size={25}
-                color="white"
-                onPress={handleOrientationChange}
+      <SafeAreaView className="h-full">
+        <StatusBar hidden />
+        {showVideo ? (
+          <View className={`${fullScreen && 'h-full'} h-full relative`}>
+            {/* <StatusBar  /> */}
+            {loading ? (
+              <ActivityIndicator
+                className="absolute top-[40%] left-[50%]"
+                size="large"
+                animating={true}
+                color="red"
               />
-            </TouchableOpacity>
-          </> */}
-        </View>
-      ) : (
-        <View>
-          <View className="h-80 relative ">
-            <Image
-              source={{uri: `${IMAGE_URL}/${movies?.backdrop_path}`}}
-              className="h-80"
-              style={{opacity: 0.7}}
-            />
-
-            <TouchableOpacity
-              onPress={() => {
-                setShowVideo(true);
-              }} // Set showVideo state to true when button is clicked
-              style={{backgroundColor: 'rgba(255,255,255,0.3)'}}
-              className="rounded-l-full absolute bottom-32 p-2 right-0">
-              <View className="flex-row items-center space-x-1">
-                <View className="bg-white rounded-full p-1">
-                  <PlayIcon size={22} color="red" />
+            ) : (
+              <View className="h-screen">
+                <StatusBar />
+                <YoutubePlayer
+                  height={500}
+                  play={playing}
+                  videoId={videos?.trailer?.youtube_video_id}
+                  onFullScreenChange={handleOrientationChange}
+                  onChangeState={onStateChange}
+                />
+                <View className="flex-1 justify-between">
+                  <Snackbar
+                    className="bg-[#cbc9c9]"
+                    visible={snackbarVisible}
+                    onDismiss={() => setSnackbarVisible(false)}
+                    duration={3000} // 3 seconds
+                    action={{
+                      label: 'exit',
+                      textColor: 'black',
+                      onPress: () => {
+                        setSnackbarVisible(false);
+                        handleBackPress(); // Call handleBackPress again to navigate back
+                      },
+                    }}>
+                    <Text className="text-black">Press again to exit</Text>
+                  </Snackbar>
                 </View>
-                <Text className="text-white">Watch Trailer</Text>
               </View>
-            </TouchableOpacity>
-
-            <View
-              className=" absolute bottom-0 w-full p-4 "
-              style={{backgroundColor: 'rgba(255,255,255,0.2)'}}>
-              <Text className="font-bold text-center text-white text-lg tracking-widest">
-                {movies?.title}
-              </Text>
-              <Text className="font-light text-center text-white text-base tracking-widest">
-                {`${movies?.original_language} | ${names} | ${movies?.runtime} m`}
-              </Text>
-            </View>
+            )}
           </View>
-          <View className="mt-1 p-2">
-            <Text className="text-[#cbc9c9] font-bold text-lg tracking-widest">
-              Story Line
-            </Text>
-            <Text className="text-[#cbc9c9] mt-2 tracking-wide text-base text-justify leading-[22px]">
-              {overFlow(movies?.overview, 150)}
-            </Text>
-            <View className="mt-4">
-              <Text className="text-[#cbc9c9] font-bold text-lg tracking-widest">
-                Star cast
-              </Text>
-              <FlatList
-                horizontal
-                data={cast}
-                keyExtractor={item => item.id.toString()}
-                renderItem={({item}) => <CastItem item={item} />}
-                contentContainerStyle={{marginTop: 5, marginLeft: 2}} // Adjust spacing as needed
+        ) : (
+          <View className="h-screen">
+            <View className="h-80 relative ">
+              <Image
+                source={{uri: `${IMAGE_URL}/${movies?.backdrop_path}`}}
+                className="h-80"
+                style={{opacity: 0.7}}
               />
+
+              <TouchableOpacity
+                onPress={() => {
+                  setShowVideo(true);
+                }} // Set showVideo state to true when button is clicked
+                style={{backgroundColor: 'rgba(255,255,255,0.3)'}}
+                className="rounded-l-full absolute bottom-32 p-2 right-0">
+                <View className="flex-row items-center space-x-1">
+                  <View className="bg-white rounded-full p-1">
+                    <PlayIcon size={22} color="red" />
+                  </View>
+                  <Text className="text-white">Watch Trailer</Text>
+                </View>
+              </TouchableOpacity>
+
+              <View
+                className=" absolute bottom-0 w-full p-4 "
+                style={{backgroundColor: 'rgba(255,255,255,0.2)'}}>
+                <Text className="font-bold text-center text-white text-lg tracking-widest">
+                  {movies?.title}
+                </Text>
+                <Text className="font-light text-center text-white text-base tracking-widest">
+                  {`${movies?.original_language} | ${names} | ${movies?.runtime} m`}
+                </Text>
+              </View>
+            </View>
+            <View className="mt-1 p-2">
+              <Text className="text-[#cbc9c9] font-bold text-lg tracking-widest">
+                Story Line
+              </Text>
+              <Text className="text-[#cbc9c9] mt-2 tracking-wide text-base text-justify leading-[22px]">
+                {overFlow(movies?.overview, 150)}
+              </Text>
+              <View className="mt-4">
+                <Text className="text-[#cbc9c9] font-bold text-lg tracking-widest">
+                  Star cast
+                </Text>
+                <FlatList
+                  horizontal
+                  data={cast}
+                  keyExtractor={item => item.id.toString()}
+                  renderItem={({item}) => <CastItem item={item} />}
+                  contentContainerStyle={{marginTop: 5, marginLeft: 2}} // Adjust spacing as needed
+                />
+              </View>
+            </View>
+            {/* <SnackBar /> */}
+            <View className="flex-1 justify-between">
+              <Snackbar
+                className="bg-[#cbc9c9]"
+                visible={snackbarVisible}
+                onDismiss={() => setSnackbarVisible(false)}
+                duration={3000} // 3 seconds
+                action={{
+                  label: 'exit',
+                  textColor: 'black',
+                  onPress: () => {
+                    setSnackbarVisible(false);
+                    handleBackPress(); // Call handleBackPress again to navigate back
+                  },
+                }}>
+                <Text className="text-black">Press again to exit</Text>
+              </Snackbar>
             </View>
           </View>
-        </View>
-      )}
+        )}
+      </SafeAreaView>
     </ScrollView>
   );
 };
