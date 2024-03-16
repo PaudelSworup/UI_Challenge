@@ -16,14 +16,11 @@ import {
   horror_movies,
   romance_movies,
   scifi_movies,
-  trending_movies,
   upcoming_movies,
 } from '../../APIS/API/MoviesApi';
 import {useQuery} from 'react-query';
-import Video from 'react-native-video';
-import {IMAGE_URL} from '../../../config';
-import {PlayIcon, StarIcon} from 'react-native-heroicons/solid';
 import MovieBanner from './MovieBanner';
+import SkeletonLoading from '../../ReusableComponents/SkeletonLoading';
 
 const Movie = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -32,6 +29,7 @@ const Movie = () => {
   const [comedy, setComedy] = useState([]);
   const [horror, setHorror] = useState([]);
   const [romance, setRomance] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   //upcoming movies
   const movies = useQuery(['upcoming'], async () => upcoming_movies(), {
@@ -60,35 +58,43 @@ const Movie = () => {
 
   return (
     <SafeAreaView className="h-full px-2 pb-2 bg-[#272728]">
-      <View className="justify-between py-3  flex-row">
-        <View>
-          <Text className="text-[20px] tracking-wider text-white font-bold">
-            Hello Sworup
-          </Text>
-          <Text className="font-light text-white tracking-tight">
-            What to Watch?
-          </Text>
-        </View>
+      {loading ? (
+        <SkeletonLoading />
+      ) : (
+        <>
+          <View className="justify-between py-3  flex-row">
+            <View>
+              <Text className="text-[20px] tracking-wider text-white font-bold">
+                Hello Sworup
+              </Text>
+              <Text className="font-light text-white tracking-tight">
+                What to Watch?
+              </Text>
+            </View>
 
-        <View>
-          <Image
-            source={{
-              uri: 'https://img.freepik.com/premium-vector/beard-man-logo_671039-606.jpg',
-            }}
-            style={{width: 50, height: 50, borderRadius: 50}}
-          />
-        </View>
-      </View>
+            <View>
+              <Image
+                source={{
+                  uri: 'https://img.freepik.com/premium-vector/beard-man-logo_671039-606.jpg',
+                }}
+                style={{width: 50, height: 50, borderRadius: 50}}
+              />
+            </View>
+          </View>
+
+          <View className="py-3">
+            <Searchbar
+              placeholder="Search"
+              onChangeText={setSearchQuery}
+              value={searchQuery}
+            />
+          </View>
+        </>
+      )}
 
       <View className="py-3">
-        <Searchbar
-          placeholder="Search"
-          onChangeText={setSearchQuery}
-          value={searchQuery}
-        />
+        <MovieBanner />
       </View>
-
-      <MovieBanner />
 
       <ScrollView>
         <Row title="Upcoming" movies={upcoming} />

@@ -34,11 +34,11 @@ const MovieBanner = () => {
     setPlay(!play);
   };
 
-  console.log(banner?.id);
-  console.log(videos?.trailer?.youtube_video_id);
+  // console.log(banner);
+  // console.log(videos?.trailer?.youtube_video_id);
   return (
     <>
-      {loading ? (
+      {!loading ? (
         <SkeletonBanner />
       ) : (
         <View
@@ -68,7 +68,7 @@ const MovieBanner = () => {
           {!play && (
             <View className="bottom-4 p-3 absolute">
               <Text className="text-white  text-base ">
-                {banner?.title || banner?.original_title}
+                {banner?.title || banner?.original_title || banner?.name}
               </Text>
               <View className="flex-row items-center space-x-1">
                 <StarIcon size={25} color="yellow" />
