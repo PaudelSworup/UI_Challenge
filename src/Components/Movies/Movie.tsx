@@ -84,6 +84,7 @@ const Movie = () => {
 
           <View className="py-3">
             <Searchbar
+              className="h-[53px]"
               placeholder="Search"
               onChangeText={setSearchQuery}
               value={searchQuery}
