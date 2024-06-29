@@ -6,6 +6,7 @@ import {useQuery} from 'react-query';
 import {movies_videos, trending_movies} from '../../APIS/API/MoviesApi';
 import YoutubePlayer from 'react-native-youtube-iframe';
 import SkeletonBanner from '../../ReusableComponents/SkeletonBanner';
+import {heightPercentageToDP as hp} from 'react-native-responsive-screen';
 
 const MovieBanner = () => {
   const [banner, setBanner] = useState<any>();
@@ -43,10 +44,15 @@ const MovieBanner = () => {
       ) : (
         <View
           className="relative"
-          style={{height: 200, borderRadius: 20, overflow: 'hidden'}}>
+          style={{
+            height: hp(30),
+            borderRadius: 20,
+            overflow: 'hidden',
+            // borderColor: 'white',
+          }}>
           {play ? (
             <YoutubePlayer
-              height={200}
+              height={230}
               play={true}
               videoId={videos?.trailer?.youtube_video_id}
             />
@@ -61,7 +67,7 @@ const MovieBanner = () => {
               }}
               imageStyle={{opacity: 0.9}}
               blurRadius={2}
-              style={{flex: 1}}
+              style={{flex: 1, overflow: 'hidden'}}
             />
           )}
 

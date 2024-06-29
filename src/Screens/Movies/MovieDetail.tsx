@@ -22,6 +22,7 @@ import {useQuery} from 'react-query';
 import {
   movies_cast,
   movies_videos,
+  recommended_movies,
   single_movies,
 } from '../../APIS/API/MoviesApi';
 import {IMAGE_URL} from '../../../config';
@@ -37,6 +38,11 @@ import {overFlow} from '../../utils/utils';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import YoutubePlayer from 'react-native-youtube-iframe';
 import {StarIcon} from 'react-native-heroicons/solid';
+import {
+  heightPercentageToDP as hp,
+  widthPercentageToDP as wp,
+} from 'react-native-responsive-screen';
+import navigationStrings from '../../Contstants/navigationStrings';
 
 type RootStackParamList = {
   movieDetailID: {movieId?: number};
@@ -51,6 +57,7 @@ const MovieDetail = () => {
   const [cast, setCast] = useState<any>();
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [backPressedOnce, setBackPressedOnce] = useState(false);
+  const [recommended, setRecommended] = useState<any>();
 
   const route = useRoute<RouteProp<RootStackParamList, 'movieDetailID'>>();
   const {movieId} = route.params;
@@ -64,6 +71,16 @@ const MovieDetail = () => {
       onSettled: data => setMovies(data?.movies),
     },
   );
+
+  const recommendedMovies = useQuery(
+    ['recommended', movieId],
+    async () => recommended_movies(movieId as number),
+    {
+      onSettled: data => setRecommended(data?.movies),
+    },
+  );
+
+  // console.log(movies);
 
   const genres = movies?.genres?.map(
     (genre: {id: number; name: string}) => genre.name,
@@ -88,8 +105,6 @@ const MovieDetail = () => {
       // enabled: !movieId,
     },
   );
-
-  console.log(cast?.profile_path);
 
   const handleOrientationChange = () => {
     if (fullScreen) {
@@ -141,67 +156,150 @@ const MovieDetail = () => {
           // uri: 'https://marketplace.canva.com/EAFltPVX5QA/1/0/800w/canva-cute-cartoon-anime-girl-avatar-D4brQth3b2I.jpg',
           uri: `${IMAGE_URL}${item?.profile_path}`,
         }}
-        className="h-20 w-20 rounded-full"
+        className="rounded-full"
+        style={{height: hp(10), width: wp(20)}}
       />
       <View className="p-4">
-        <Text className="text-[#cbc9c9] text-base">Actor</Text>
-        <Text className="text-[#cbc9c9] text-lg font-bold tracking-wider">
+        <Text className="text-[#cbc9c9]" style={{fontSize: hp(2)}}>
+          Actor
+        </Text>
+        <Text
+          className="text-[#cbc9c9]  font-bold tracking-wider"
+          style={{fontSize: hp(2.5)}}>
           {item?.name}
         </Text>
       </View>
     </View>
   ));
 
+  const RecommendedItems = React.memo(({item}: any) => (
+    <View
+      className="relative"
+      style={{
+        borderRadius: 20,
+        marginRight: 10,
+      }}>
+      <TouchableOpacity
+        onPress={() =>
+          navigation.replace(navigationStrings.DETAIL, {movieId: item?.id})
+        }>
+        <Image
+          source={{
+            uri: item
+              ? `${IMAGE_URL}/${item.backdrop_path}`
+              : 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ8JrNcJV0PaRPCm3vBRGmxdAE1B993db_Xig',
+          }}
+          // style={{height: 160, width: 250, borderRadius: 20}}
+          style={{height: hp(20), borderRadius: 10, marginTop: 10}}
+        />
+      </TouchableOpacity>
+      <View
+        className="absolute bottom-0 h-[70px] p-2  w-full "
+        style={{
+          backgroundColor: 'rgba(255,255,255,0.2)',
+          borderBottomLeftRadius: 20,
+        }}>
+        <Text className="text-white font-bold text-base tracking-wide ">
+          {overFlow(item?.title, 25)}
+        </Text>
+        <View className="flex-row items-center space-x-1">
+          <StarIcon size={22} color="yellow" />
+          <Text className="text-white text-base">
+            {item?.vote_average.toFixed(1)}
+          </Text>
+        </View>
+      </View>
+    </View>
+  ));
+
+  if (moviesVideos?.isLoading) {
+    return (
+      <View
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}>
+        <ActivityIndicator size="large" animating={true} color="#0000ff" />
+      </View>
+    );
+  }
+
   return (
     <SafeAreaView>
-      <ScrollView className="bg-[#272728]  h-full">
-        <StatusBar hidden />
-        {showVideo ? (
-          <View className={`${fullScreen && 'h-full'} h-full relative`}>
-            {loading ? (
+      <StatusBar
+        translucent
+        backgroundColor="transparent"
+        barStyle="light-content"
+      />
+      {showVideo ? (
+        <View className="relative bg-[#272728]" style={{height: hp(100)}}>
+          {/* {loading ? (
               <ActivityIndicator
                 className="absolute top-[40%] left-[50%]"
                 size="large"
                 animating={true}
                 color="red"
               />
-            ) : (
-              <View className="h-screen">
-                <StatusBar />
-                <YoutubePlayer
-                  height={500}
-                  play={playing}
-                  videoId={videos?.trailer?.youtube_video_id}
-                  onFullScreenChange={handleOrientationChange}
-                  onChangeState={onStateChange}
-                />
-                <View className="flex-1 justify-between">
-                  <Snackbar
-                    className="bg-[#cbc9c9]"
-                    visible={snackbarVisible}
-                    onDismiss={() => setSnackbarVisible(false)}
-                    duration={3000} // 3 seconds
-                    action={{
-                      label: 'go back',
-                      textColor: 'black',
-                      onPress: () => {
-                        setSnackbarVisible(false);
-                        handleBackPress(); // Call handleBackPress again to navigate back
-                      },
-                    }}>
-                    <Text className="text-black">Press again to go back</Text>
-                  </Snackbar>
-                </View>
+            ) : ( */}
+          <View className="h-screen">
+            <View className=" h-screen ">
+              <StatusBar />
+
+              <YoutubePlayer
+                height={250}
+                play={playing}
+                videoId={videos?.trailer?.youtube_video_id}
+                onFullScreenChange={handleOrientationChange}
+                onChangeState={onStateChange}
+              />
+
+              <Text
+                className="p-2 text-white font-bold"
+                style={{fontSize: hp(3)}}>
+                Recommended for you
+              </Text>
+
+              <FlatList
+                showsVerticalScrollIndicator
+                data={recommended}
+                keyExtractor={item => item.id.toString()}
+                renderItem={({item}) => <RecommendedItems item={item} />}
+                contentContainerStyle={{marginTop: 5, marginLeft: 2}} // Adjust spacing as needed
+              />
+
+              <View className="flex-1 justify-between">
+                <Snackbar
+                  className="bg-[#cbc9c9]"
+                  visible={snackbarVisible}
+                  onDismiss={() => setSnackbarVisible(false)}
+                  duration={3000} // 3 seconds
+                  action={{
+                    label: 'go back',
+                    textColor: 'black',
+                    onPress: () => {
+                      setSnackbarVisible(false);
+                      handleBackPress(); // Call handleBackPress again to navigate back
+                    },
+                  }}>
+                  <Text className="text-black">Press again to go back</Text>
+                </Snackbar>
               </View>
-            )}
+            </View>
           </View>
-        ) : (
+          {/* )} */}
+        </View>
+      ) : (
+        <ScrollView className="bg-[#272728]  h-full">
           <View className="h-full">
-            <View className="h-[410px] relative ">
+            <View className="relative" style={{height: hp(60)}}>
               <Image
                 source={{uri: `${IMAGE_URL}/${movies?.poster_path}`}}
-                className="h-[410px]"
-                style={{opacity: 0.7}}
+                style={{opacity: 0.7, height: hp(60)}}
               />
 
               <TouchableOpacity
@@ -230,21 +328,33 @@ const MovieDetail = () => {
             </View>
 
             <View className="p-2 flex-row space-x-5 mt-1">
-              <Text className="text-[#cbc9c9] font-light">{names}</Text>
-              <Text className="text-[#cbc9c9] font-light">
+              <Text
+                className="text-[#cbc9c9] font-light"
+                style={{fontSize: hp(1.8)}}>
+                {names}
+              </Text>
+              <Text
+                className="text-[#cbc9c9] font-light"
+                style={{fontSize: hp(1.8)}}>
                 {movies?.runtime} m
               </Text>
             </View>
 
             <View className="mt-1 p-2">
-              <Text className="text-[#cbc9c9] font-bold text-lg tracking-widest">
+              <Text
+                className="text-[#cbc9c9] font-bold  tracking-widest"
+                style={{fontSize: hp(3)}}>
                 Story Line
               </Text>
-              <Text className="text-[#cbc9c9] font-light mt-2 tracking-wide text-sm text-justify leading-[22px]">
+              <Text
+                className="text-[#cbc9c9] font-light mt-2 tracking-wide text-sm text-justify leading-[22px]"
+                style={{fontSize: hp(1.69)}}>
                 {overFlow(movies?.overview, 350)}
               </Text>
               <View className="mt-1 p-2">
-                <Text className="text-[#cbc9c9] font-bold text-lg tracking-widest">
+                <Text
+                  className="text-[#cbc9c9] font-bold  tracking-widest"
+                  style={{fontSize: hp(3)}}>
                   Star cast
                 </Text>
                 <FlatList
@@ -274,8 +384,8 @@ const MovieDetail = () => {
               </Snackbar>
             </View>
           </View>
-        )}
-      </ScrollView>
+        </ScrollView>
+      )}
     </SafeAreaView>
   );
 };

@@ -53,3 +53,9 @@ export const movies_cast = async (movieID: number) => {
   const movies = await response.json();
   return movies;
 };
+
+export const recommended_movies = async (movieID: number) => {
+  const response = await fetch(`${BASE_URL}/recommendations/${movieID}`);
+  const movies = await response.json();
+  return movies;
+};

@@ -7,6 +7,7 @@ import {
   useWindowDimensions,
   ImageBackground,
   TouchableOpacity,
+  StatusBar,
 } from 'react-native';
 import React, {useEffect, useRef, useState} from 'react';
 import {Searchbar} from 'react-native-paper';
@@ -58,11 +59,16 @@ const Movie = () => {
 
   return (
     <SafeAreaView className="h-full px-2 pb-2 bg-[#272728]">
+      <StatusBar
+        translucent
+        backgroundColor="transparent"
+        // barStyle="light-content"
+      />
       {loading ? (
         <SkeletonLoading />
       ) : (
         <>
-          <View className="justify-between py-3  flex-row">
+          <View className="justify-between py-6  flex-row">
             <View>
               <Text className="text-[20px] tracking-wider text-white font-bold">
                 Hello Sworup

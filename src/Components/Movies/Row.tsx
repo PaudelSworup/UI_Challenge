@@ -8,6 +8,10 @@ import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import navigationStrings from '../../Contstants/navigationStrings';
 import Skeleton from '../../ReusableComponents/Skeleton';
 import {overFlow} from '../../utils/utils';
+import {
+  widthPercentageToDP as wp,
+  heightPercentageToDP as hp,
+} from 'react-native-responsive-screen';
 
 const Row: React.FC<{title: string; movies?: any}> = ({title, movies}) => {
   const navigation = useNavigation<NativeStackNavigationProp<ParamListBase>>();
@@ -38,7 +42,8 @@ const Row: React.FC<{title: string; movies?: any}> = ({title, movies}) => {
               ? `${IMAGE_URL}/${item.backdrop_path}`
               : 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ8JrNcJV0PaRPCm3vBRGmxdAE1B993db_Xig',
           }}
-          style={{height: 160, width: 250, borderRadius: 20}}
+          // style={{height: 160, width: 250, borderRadius: 20}}
+          style={{height: hp(20), width: wp(60), borderRadius: 20}}
         />
       </TouchableOpacity>
       <View
